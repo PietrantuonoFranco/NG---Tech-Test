@@ -3,6 +3,8 @@ import '../styles/GetCandidateData.css'
 import { validateEmail } from '../lib/utils/validateEmail'
 import { useCandidateContext } from '../contexts/CandidateContext'
 import { fetchCandidateByEmail } from '../lib/api/fetchCandidateByEmail'
+import CandidateCard from './CandidateCard'
+import AlertMessage from './AlertMessage'
 
 function GetCandidateData() {
   const [email, setEmail] = useState('')
@@ -99,76 +101,25 @@ function GetCandidateData() {
           </button>
         </div>
 
-        {localError && (
-          <div style={{
-            padding: '12px 16px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '6px',
-            color: '#dc2626',
-            fontSize: '0.9rem',
-            fontWeight: '500',
-            animation: 'fadeIn 200ms ease-out'
-          }}>
-            {localError}
-          </div>
-        )}
+        {localError && <AlertMessage message={localError} type="error" />}
 
-        {error && (
-          <div style={{
-            padding: '12px 16px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '6px',
-            color: '#dc2626',
-            fontSize: '0.9rem',
-            fontWeight: '500',
-            animation: 'fadeIn 200ms ease-out'
-          }}>
-            {error}
-          </div>
+        {error && <AlertMessage message={error} type="error" />}
+
+        {candidate && (
+          <AlertMessage 
+            message={`Candidate loaded for ${lastSubmittedEmail}`} 
+            type="success" 
+          />
         )}
 
         {candidate && (
-          <div style={{
-            padding: '12px 16px',
-            background: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '6px',
-            color: '#059669',
-            fontSize: '0.9rem',
-            fontWeight: '500',
-            animation: 'fadeIn 200ms ease-out'
-          }}>
-            Candidate loaded for {lastSubmittedEmail}
-          </div>
-        )}
-
-        {candidate && (
-          <div className="candidate-card">
-            <div className="candidate-card__header">
-              <div>
-                <h2>{candidate.firstName} {candidate.lastName}</h2>
-                <p>{candidate.email}</p>
-              </div>
-              <button type="button" className="clear-button" onClick={() => {
-                clearCandidateData()
-                setLastSubmittedEmail('')
-              }}>
-                Clear
-              </button>
-            </div>
-            <div className="candidate-card__meta">
-              <div>
-                <span>Candidate ID</span>
-                <strong>{candidate.candidateId}</strong>
-              </div>
-              <div>
-                <span>Application ID</span>
-                <strong>{candidate.applicationId}</strong>
-              </div>
-            </div>
-          </div>
+          <CandidateCard 
+            candidate={candidate}
+            onClear={() => {
+              clearCandidateData()
+              setLastSubmittedEmail('')
+            }}
+          />
         )}
       </form>
     </>
