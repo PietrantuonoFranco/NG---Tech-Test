@@ -3,12 +3,14 @@ import GetCandidateData from "./components/GetCandidateData"
 import JobsTable from "./components/JobsTable"
 import AlertMessage from "./components/AlertMessage"
 import { fetchJobsList } from "./lib/api/fetchJobsList"
+import { useCandidateContext } from "./contexts/CandidateContext"
 
 function App() {
   const [jobs, setJobs] = useState([])
   const [jobsLoading, setJobsLoading] = useState(false)
   const [jobsError, setJobsError] = useState(null)
-
+  const { candidate } = useCandidateContext()
+  
   const handleFetchJobs = async () => {
     setJobsLoading(true)
     setJobsError(null)
@@ -38,7 +40,12 @@ function App() {
 
       {jobsError && <AlertMessage message={jobsError} type="error" />}
       
-      {jobs.length > 0 && <JobsTable jobs={jobs} loading={jobsLoading} />}
+      {jobs.length > 0 && candidate && (
+        <JobsTable 
+          jobs={jobs} 
+          loading={jobsLoading} 
+        />
+      )}
     </main>
   )
 }

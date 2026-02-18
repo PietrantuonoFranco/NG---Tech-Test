@@ -103,6 +103,24 @@
   box-shadow: var(--shadow-sm);
 }
 
+.jobs-table-apply-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.jobs-table-apply-btn--applied {
+  background: var(--success) !important;
+  cursor: default;
+}
+
+.jobs-table-error {
+  padding: 12px 16px;
+  background: var(--error-light);
+  border-bottom: 1px solid var(--error-border);
+  color: var(--error-dark);
+  font-size: 0.875rem;
+}
+
 .jobs-table-loading,
 .jobs-table-empty {
   padding: var(--spacing-xl);
