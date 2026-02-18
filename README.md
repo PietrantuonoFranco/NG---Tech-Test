@@ -97,12 +97,16 @@ Usuario hace click en "Apply"
     ↓
 JobsTable.handleApply(jobId)
     ↓
+Validación de campos requeridos:
+  - Datos del candidato (uuid, candidateId)
+  - URL del repositorio (VITE_GITHUB_REPO_URL)
+    ↓
 applyToJob() → API POST /api/candidate/apply-to-job
-    (Envía uuid, jobId, candidateId, repoUrl)
+    (Envía uuid, jobId, candidateId, applicationId, repoUrl)
     ↓
 Botón cambia a "Applied ✓" y se deshabilita
     ↓
-Se muestra notificación de éxito
+Se muestra notificación de éxito o error
 ```
 
 ---
@@ -124,7 +128,8 @@ Se muestra notificación de éxito
 - **Responsabilidad**: Tabla interactiva de posiciones disponibles
 - **Props**: `jobs` (array), `loading` (boolean)
 - **Estado**: applyingJobId (para cargar), appliedJobs (para historial), error
-- **Función**: Permite aplicar a trabajos con feedback visual
+- **Validaciones**: Datos del candidato, URL del repositorio
+- **Función**: Permite aplicar a trabajos con feedback visual y manejo de errores
 
 ### **AlertMessage.tsx**
 - **Responsabilidad**: Componente reutilizable de notificaciones
@@ -191,11 +196,15 @@ Body:
   "uuid": "string",
   "jobId": "string",
   "candidateId": "string",
+  "applicationId": "string",  // Opcional pero recomendado
   "repoUrl": "string"
 }
 
 Respuesta (200):
 { "ok": true }
+
+Respuesta (400):
+{ "error": "Mensaje de error específico" }
 ```
 
 ---
@@ -275,9 +284,17 @@ npm run preview
 ### Candidato
 - Debe existir en el sistema
 - Requiere uuid y candidateId
+- ApplicationId se envía opcionalmente
 
-### Trabajo
-- ID debe ser válido
+### Aplicación a Trabajo
+- Datos del candidato completos (uuid, candidateId)
+- URL del repositorio configurada (VITE_GITHUB_REPO_URL)
+- ID del trabajo válido
 - Debe estar en la lista disponible
+
+### Manejo de Errores
+- Mensajes descriptivos para cada tipo de error
+- Validación pre-envío para evitar llamadas fallidas
+- Extracción de mensajes de error de respuestas API
 
 ---
