@@ -13,7 +13,7 @@ import type { Candidate } from '../interfaces/entities/Candidate'
 
 export async function fetchCandidateByEmail(email: string): Promise<Candidate> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-  const response = await fetch(`${baseUrl}/api/candidates?email=${encodeURIComponent(email)}`)
+  const response = await fetch(`${baseUrl}/api/candidate/get-by-email?email=${encodeURIComponent(email)}`)
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
