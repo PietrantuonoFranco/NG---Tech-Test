@@ -1,38 +1,56 @@
 import { useState } from 'react'
 import '../styles/GetCandidateData.css'
 import { validateEmail } from '../lib/utils/validateEmail'
+import { useCandidateContext } from '../contexts/CandidateContext'
+import { fetchCandidateByEmail } from '../lib/api/fetchCandidateByEmail'
 
 function GetCandidateData() {
   const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
+  const [lastSubmittedEmail, setLastSubmittedEmail] = useState('')
+  const [localError, setLocalError] = useState('')
+  const {
+    candidate,
+    loading,
+    error,
+    setCandidateData,
+    setLoading,
+    setError,
+    clearCandidateData,
+  } = useCandidateContext()
+
+  const handleFetchCandidate = async (emailValue: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await fetchCandidateByEmail(emailValue)
+      setCandidateData(data)
+      setLastSubmittedEmail(emailValue)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch candidate data'
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleApplication = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     const trimmedEmail = email.trim()
 
-    // Validar que el email no esté vacío
     if (!trimmedEmail) {
-      setError('Please enter an email address')
+      setLocalError('Please enter an email address')
       return
     }
 
-    // Validar que el email tenga un formato válido
     if (!validateEmail(trimmedEmail)) {
-      setError('Please enter a valid email address')
+      setLocalError('Please enter a valid email address')
       return
     }
 
-    // Si todo es válido, enviar
-    setError('')
-    setSubmitted(true)
-    setEmail('')
-    
-    // Resetear después de 3 segundos
-    setTimeout(() => {
-      setSubmitted(false)
-    }, 3000)
+    setLocalError('')
+    handleFetchCandidate(trimmedEmail)
   }
 
   return (
@@ -56,17 +74,20 @@ function GetCandidateData() {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value)
-              setError('')
+              setLocalError('')
+              if (error) {
+                setError(null)
+              }
             }}
-            disabled={submitted}
+            disabled={loading}
             required
           />
           <button
             type="submit"
-            disabled={!email.trim() || submitted}
+            disabled={!email.trim() || loading}
             className="submit-button"
           >
-            { submitted ?
+            { loading ?
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
                   <polyline fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" points="2.75 8.75 6.25 12.25 13.25 4.75" />
                 </svg>
@@ -77,6 +98,21 @@ function GetCandidateData() {
             }
           </button>
         </div>
+
+        {localError && (
+          <div style={{
+            padding: '12px 16px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '6px',
+            color: '#dc2626',
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            animation: 'fadeIn 200ms ease-out'
+          }}>
+            {localError}
+          </div>
+        )}
 
         {error && (
           <div style={{
@@ -93,7 +129,7 @@ function GetCandidateData() {
           </div>
         )}
 
-        {submitted && (
+        {candidate && (
           <div style={{
             padding: '12px 16px',
             background: 'rgba(16, 185, 129, 0.1)',
@@ -104,7 +140,34 @@ function GetCandidateData() {
             fontWeight: '500',
             animation: 'fadeIn 200ms ease-out'
           }}>
-            Application submitted successfully for {email}
+            Candidate loaded for {lastSubmittedEmail}
+          </div>
+        )}
+
+        {candidate && (
+          <div className="candidate-card">
+            <div className="candidate-card__header">
+              <div>
+                <h2>{candidate.firstName} {candidate.lastName}</h2>
+                <p>{candidate.email}</p>
+              </div>
+              <button type="button" className="clear-button" onClick={() => {
+                clearCandidateData()
+                setLastSubmittedEmail('')
+              }}>
+                Clear
+              </button>
+            </div>
+            <div className="candidate-card__meta">
+              <div>
+                <span>Candidate ID</span>
+                <strong>{candidate.candidateId}</strong>
+              </div>
+              <div>
+                <span>Application ID</span>
+                <strong>{candidate.applicationId}</strong>
+              </div>
+            </div>
           </div>
         )}
       </form>
