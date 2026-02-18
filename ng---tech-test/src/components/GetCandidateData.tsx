@@ -6,7 +6,12 @@ import { fetchCandidateByEmail } from '../lib/api/fetchCandidateByEmail'
 import CandidateCard from './CandidateCard'
 import AlertMessage from './AlertMessage'
 
-function GetCandidateData() {
+interface GetCandidateDataProps {
+  onCandidateLoaded?: () => void
+  onCandidateCleared?: () => void
+}
+
+function GetCandidateData({ onCandidateLoaded, onCandidateCleared }: GetCandidateDataProps) {
   const [email, setEmail] = useState('')
   const [lastSubmittedEmail, setLastSubmittedEmail] = useState('')
   const [localError, setLocalError] = useState('')
@@ -28,6 +33,11 @@ function GetCandidateData() {
       const data = await fetchCandidateByEmail(emailValue)
       setCandidateData(data)
       setLastSubmittedEmail(emailValue)
+      
+      // Notify parent component to fetch jobs
+      if (onCandidateLoaded) {
+        await onCandidateLoaded()
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch candidate data'
       setError(errorMessage)
@@ -118,6 +128,9 @@ function GetCandidateData() {
             onClear={() => {
               clearCandidateData()
               setLastSubmittedEmail('')
+              if (onCandidateCleared) {
+                onCandidateCleared()
+              }
             }}
           />
         )}
