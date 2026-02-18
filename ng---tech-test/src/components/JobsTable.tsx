@@ -16,7 +16,23 @@ function JobsTable({ jobs, loading }: JobsTableProps) {
   const [error, setError] = useState<string | null>(null)
 
   const handleApply = async (jobId: string) => {
-    if (!candidate) return
+    if (!candidate) {
+      setError('Candidate data not found. Please load your profile first.')
+      return
+    }
+    
+    const repoUrl = import.meta.env.VITE_GITHUB_REPO_URL || ''
+    
+    // Validate all required fields
+    if (!candidate.uuid || !candidate.candidateId) {
+      setError('Missing candidate information. Please reload your profile.')
+      return
+    }
+    
+    if (!repoUrl) {
+      setError('Repository URL not configured. Please set VITE_GITHUB_REPO_URL in your .env file.')
+      return
+    }
     
     setApplyingJobId(jobId)
     setError(null)
@@ -26,7 +42,8 @@ function JobsTable({ jobs, loading }: JobsTableProps) {
         uuid: candidate.uuid,
         jobId: jobId,
         candidateId: candidate.candidateId,
-        repoUrl: import.meta.env.VITE_GITHUB_REPO_URL || '',
+        applicationId: candidate.applicationId,
+        repoUrl: repoUrl,
       })
       
       setAppliedJobs(prev => new Set(prev).add(jobId))
